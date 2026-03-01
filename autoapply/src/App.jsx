@@ -423,11 +423,72 @@ function CopyBtn({ text }) {
   );
 }
 
+// ─── JOB INFO SCRAPER ─────────────────────────────────────────────────────────
+async function scrapeJobInfo(url) {
+  try {
+    const proxy = `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res = await fetch(proxy);
+    if (!res.ok) return { positionTitle: "", company: "" };
+    const { contents: html } = await res.json();
+    const doc = new DOMParser().parseFromString(html, "text/html");
+
+    let positionTitle = "";
+    let company = "";
+
+    // 1. JSON-LD JobPosting schema (most reliable)
+    for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+      try {
+        const json = JSON.parse(script.textContent);
+        const items = Array.isArray(json) ? json : [json];
+        for (const item of items) {
+          const job = item["@type"] === "JobPosting" ? item
+            : item["@graph"]?.find?.(n => n["@type"] === "JobPosting");
+          if (job) {
+            positionTitle = job.title || "";
+            company = job.hiringOrganization?.name || "";
+            if (positionTitle && company) break;
+          }
+        }
+      } catch { /* malformed JSON-LD, skip */ }
+      if (positionTitle && company) break;
+    }
+
+    // 2. Open Graph tags
+    if (!positionTitle)
+      positionTitle = doc.querySelector('meta[property="og:title"]')?.content || "";
+    if (!company)
+      company = doc.querySelector('meta[property="og:site_name"]')?.content || "";
+
+    // 3. Parse <title> — common patterns: "Role at Company", "Role - Company | Site", "Role | Company"
+    if (!positionTitle || !company) {
+      const t = doc.title.replace(/\s+/g, " ").trim();
+      const patterns = [
+        /^(.+?)\s+at\s+(.+?)(?:\s*[|\-–].*)?$/i,
+        /^(.+?)\s*[|\-–]\s*(.+?)\s*[|\-–].*$/,
+        /^(.+?)\s*[|\-–]\s*(.+?)$/,
+      ];
+      for (const re of patterns) {
+        const m = t.match(re);
+        if (m) {
+          if (!positionTitle) positionTitle = m[1].trim();
+          if (!company)       company       = m[2].trim();
+          break;
+        }
+      }
+    }
+
+    return { positionTitle: positionTitle.trim(), company: company.trim() };
+  } catch {
+    return { positionTitle: "", company: "" };
+  }
+}
+
 // ─── APPLICATIONS SCREEN ──────────────────────────────────────────────────────
 function ApplicationsScreen({ profile, addToHistory, showToast }) {
   const [url, setUrl]           = useState("");
   const [launched, setLaunched] = useState(false);
   const [showMeta, setShowMeta] = useState(false);
+  const [fetching, setFetching] = useState(false);
   const [meta, setMeta]         = useState({ positionTitle:"", company:"" });
   const [launchedUrl, setLaunchedUrl] = useState("");
 
@@ -466,7 +527,16 @@ function ApplicationsScreen({ profile, addToHistory, showToast }) {
     setLaunched(true);
   };
 
-  const handleReset = () => { setLaunched(false); setUrl(""); setLaunchedUrl(""); setShowMeta(false); };
+  const handleReset = () => { setLaunched(false); setUrl(""); setLaunchedUrl(""); setShowMeta(false); setFetching(false); };
+
+  const handleMarkSubmitted = async () => {
+    setMeta({ positionTitle: "", company: "" });
+    setShowMeta(true);
+    setFetching(true);
+    const info = await scrapeJobInfo(launchedUrl);
+    setMeta(info);
+    setFetching(false);
+  };
 
   const handleConfirm = () => {
     addToHistory({ id:Date.now(), submissionDate:new Date().toISOString(), ...meta, jobUrl:launchedUrl });
@@ -519,7 +589,7 @@ function ApplicationsScreen({ profile, addToHistory, showToast }) {
             </div>
             <div style={{ display:"flex", gap:10 }}>
               <Btn variant="ghost" onClick={handleReset}><X size={14}/> Cancel</Btn>
-              <Btn variant="success" onClick={()=>setShowMeta(true)}><Check size={14}/> Mark as Submitted</Btn>
+              <Btn variant="success" onClick={handleMarkSubmitted}><Check size={14}/> Mark as Submitted</Btn>
             </div>
           </div>
         </Card>
@@ -562,25 +632,39 @@ function ApplicationsScreen({ profile, addToHistory, showToast }) {
               </div>
               <h2 style={{ fontSize:20,fontWeight:800,color:C.navyDark,fontFamily:"'Poppins',sans-serif" }}>Record Submission</h2>
             </div>
-            <p style={{ fontSize:13.5,color:C.grayMid,marginBottom:24 }}>Enter position details to save this application to your history.</p>
-            {[
-              {key:"positionTitle", label:"Position Title", placeholder:"e.g. Senior Engineer"},
-              {key:"company",       label:"Company",        placeholder:"e.g. Acme Corp"},
-            ].map(f=>(
-              <div key={f.key} style={{ marginBottom:16 }}>
-                <label style={{ display:"block",fontSize:12,color:C.grayMid,fontWeight:600,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em" }}>{f.label}</label>
-                <input
-                  type="text"
-                  value={meta[f.key]}
-                  onChange={e=>setMeta(p=>({...p,[f.key]:e.target.value}))}
-                  placeholder={f.placeholder}
-                  style={iStyle(true)}
-                />
+            <p style={{ fontSize:13.5,color:C.grayMid,marginBottom:24 }}>
+              {fetching ? "Scanning job posting for details…" : "Confirm the details below, then save to your history."}
+            </p>
+            {fetching ? (
+              <div style={{ display:"flex", flexDirection:"column", gap:14, marginBottom:8 }}>
+                {["Position Title","Company"].map(label=>(
+                  <div key={label}>
+                    <div style={{ fontSize:12,color:C.grayMid,fontWeight:600,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em" }}>{label}</div>
+                    <div style={{ height:42, borderRadius:8, background:`linear-gradient(90deg,${C.grayLine} 25%,${C.grayBg} 50%,${C.grayLine} 75%)`, backgroundSize:"200% 100%", animation:"shimmer 1.2s infinite" }}/>
+                  </div>
+                ))}
+                <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
               </div>
-            ))}
+            ) : (
+              [
+                {key:"positionTitle", label:"Position Title", placeholder:"e.g. Senior Engineer"},
+                {key:"company",       label:"Company",        placeholder:"e.g. Acme Corp"},
+              ].map(f=>(
+                <div key={f.key} style={{ marginBottom:16 }}>
+                  <label style={{ display:"block",fontSize:12,color:C.grayMid,fontWeight:600,marginBottom:6,textTransform:"uppercase",letterSpacing:"0.05em" }}>{f.label}</label>
+                  <input
+                    type="text"
+                    value={meta[f.key]}
+                    onChange={e=>setMeta(p=>({...p,[f.key]:e.target.value}))}
+                    placeholder={f.placeholder}
+                    style={iStyle(true)}
+                  />
+                </div>
+              ))
+            )}
             <div style={{ display:"flex",gap:10,justifyContent:"flex-end",marginTop:28 }}>
               <Btn variant="ghost" onClick={()=>setShowMeta(false)}>Cancel</Btn>
-              <Btn variant="primary" onClick={handleConfirm}><Check size={14}/> Save to History</Btn>
+              <Btn variant="primary" onClick={handleConfirm} disabled={fetching}><Check size={14}/> Save to History</Btn>
             </div>
           </div>
         </div>
