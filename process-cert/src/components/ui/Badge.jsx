@@ -1,10 +1,11 @@
 import { C } from "../../data/constants.js";
 
 const ROLE_STYLES = {
-  admin:    { background: "#EDE9FE", color: "#5B21B6" },
-  engineer: { background: C.blueLight, color: C.navy },
-  operator: { background: "#DBEAFE", color: "#1D4ED8" },
-  viewer:   { background: C.grayLine, color: C.grayText },
+  admin:       { background: "#EDE9FE", color: "#5B21B6" },
+  engineer:    { background: C.blueLight, color: C.navy },
+  operator:    { background: "#DBEAFE", color: "#1D4ED8" },
+  viewer:      { background: C.grayLine, color: C.grayText },
+  super_admin: { background: "#F3E8FF", color: "#7C3AED" },
 };
 
 const STATUS_STYLES = {
@@ -22,7 +23,7 @@ export default function Badge({ type, value, style }) {
     : (STATUS_STYLES[value] || STATUS_STYLES.draft);
 
   const label = type === "role"
-    ? (value ? value.charAt(0).toUpperCase() + value.slice(1) : "")
+    ? (value ? value.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "")
     : (value ? value.replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase()) : "");
 
   return (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import {
-  LayoutDashboard, ClipboardList, GitBranch, Calendar, Users,
+  LayoutDashboard, ClipboardList, GitBranch, Calendar, Users, Shield,
 } from "lucide-react";
 
 import { C, SK } from "./data/constants.js";
@@ -18,6 +18,7 @@ import ProcessesScreen from "./components/screens/ProcessesScreen.jsx";
 import AssignmentsScreen from "./components/screens/AssignmentsScreen.jsx";
 import ExecutionScreen from "./components/screens/ExecutionScreen.jsx";
 import UsersScreen from "./components/screens/UsersScreen.jsx";
+import RolesScreen from "./components/screens/RolesScreen.jsx";
 
 // ─── Global Styles ────────────────────────────────────────────────────────────
 function GlobalStyles() {
@@ -52,6 +53,7 @@ const SCREENS = [
   { id: "processes",   label: "Processes",   icon: GitBranch,       requiredAction: ACTIONS.VIEW_PROCESSES },
   { id: "assignments", label: "Assignments", icon: Calendar,        requiredAction: ACTIONS.VIEW_ASSIGNMENTS },
   { id: "users",       label: "Users",       icon: Users,           requiredAction: ACTIONS.VIEW_USERS },
+  { id: "roles",       label: "Roles",       icon: Shield,          requiredAction: ACTIONS.VIEW_ROLES },
 ];
 
 // ─── App ──────────────────────────────────────────────────────────────────────
@@ -66,6 +68,7 @@ export default function App() {
   const [assignments, setAssignments] = useState(() => load(SK.ASSIGNMENTS, []));
   const [executions,  setExecutions]  = useState(() => load(SK.EXECUTIONS,  []));
   const [users,       setUsers]       = useState(() => load(SK.USERS,       []));
+  const [roles,       setRoles]       = useState(() => load(SK.ROLES,       []));
 
   // Save helpers
   function saveSteps(s)       { setSteps(s);       persist(SK.STEPS,       s); }
@@ -73,6 +76,7 @@ export default function App() {
   function saveAssignments(s) { setAssignments(s); persist(SK.ASSIGNMENTS, s); }
   function saveExecutions(s)  { setExecutions(s);  persist(SK.EXECUTIONS,  s); }
   function saveUsers(s)       { setUsers(s);       persist(SK.USERS,       s); }
+  function saveRoles(s)       { setRoles(s);       persist(SK.ROLES,       s); }
 
   // Active screen id
   const activeId = typeof screen === "string" ? screen : screen?.screen;
@@ -144,7 +148,13 @@ export default function App() {
       case "users":
         return (
           <UsersScreen
-            auth={auth} users={users} saveUsers={saveUsers} toast={toast}
+            auth={auth} users={users} saveUsers={saveUsers} toast={toast} roles={roles}
+          />
+        );
+      case "roles":
+        return (
+          <RolesScreen
+            auth={auth} roles={roles} saveRoles={saveRoles} toast={toast}
           />
         );
       default:

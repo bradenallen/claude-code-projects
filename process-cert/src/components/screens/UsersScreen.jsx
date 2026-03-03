@@ -9,10 +9,9 @@ import Modal from "../ui/Modal.jsx";
 import Badge from "../ui/Badge.jsx";
 import AccessDenied from "../ui/AccessDenied.jsx";
 
-const ROLES = ["admin", "engineer", "operator", "viewer"];
 const EMPTY_USER = { username: "", password: "", displayName: "", email: "", role: "operator", active: true };
 
-function UserModal({ user, onSave, onClose }) {
+function UserModal({ user, onSave, onClose, roleOptions }) {
   const [form, setForm] = useState({ ...EMPTY_USER, ...user });
   function set(k, v) { setForm(f => ({ ...f, [k]: v })); }
 
@@ -57,8 +56,8 @@ function UserModal({ user, onSave, onClose }) {
             Role
           </label>
           <select style={iStyle} value={form.role} onChange={e => set("role", e.target.value)}>
-            {ROLES.map(r => (
-              <option key={r} value={r}>{r.charAt(0).toUpperCase() + r.slice(1)}</option>
+            {roleOptions.map(r => (
+              <option key={r.value} value={r.value}>{r.label}</option>
             ))}
           </select>
         </div>
@@ -72,8 +71,17 @@ function UserModal({ user, onSave, onClose }) {
   );
 }
 
-export default function UsersScreen({ auth, users, saveUsers, toast }) {
+export default function UsersScreen({ auth, users, saveUsers, toast, roles = [] }) {
   const [editUser, setEditUser] = useState(null);
+
+  const roleOptions = roles.length > 0
+    ? roles.map(r => ({ value: r.id, label: r.name }))
+    : [
+        { value: "admin", label: "Admin" },
+        { value: "engineer", label: "Engineer" },
+        { value: "operator", label: "Operator" },
+        { value: "viewer", label: "Viewer" },
+      ];
 
   if (!auth.can(ACTIONS.VIEW_USERS)) return <AccessDenied />;
 
@@ -183,6 +191,7 @@ export default function UsersScreen({ auth, users, saveUsers, toast }) {
           user={editUser}
           onSave={handleSave}
           onClose={() => setEditUser(null)}
+          roleOptions={roleOptions}
         />
       )}
     </div>

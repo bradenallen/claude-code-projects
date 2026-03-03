@@ -24,4 +24,5 @@ export const SK = {
   ASSIGNMENTS: "pc_assignments",
   EXECUTIONS:  "pc_executions",
   SESSION:     "pc_session",
+  ROLES:       "pc_roles",
 };

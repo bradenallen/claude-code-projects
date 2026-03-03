@@ -1,4 +1,5 @@
 import { SK } from "./constants.js";
+import { PERMISSIONS } from "./permissions.js";
 
 function load(key, fallback) {
   try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
@@ -8,10 +9,39 @@ function persist(key, val) {
 }
 
 const USERS = [
-  { id:"u001", username:"admin",    password:"admin123", displayName:"Alex Rivera",   email:"alex@processcert.com",   role:"admin",    active:true, lastLogin:null },
-  { id:"u002", username:"engineer", password:"eng123",   displayName:"Sam Torres",    email:"sam@processcert.com",    role:"engineer", active:true, lastLogin:null },
-  { id:"u003", username:"operator", password:"op123",    displayName:"Jordan Lee",    email:"jordan@processcert.com", role:"operator", active:true, lastLogin:null },
-  { id:"u004", username:"viewer",   password:"view123",  displayName:"Casey Morgan",  email:"casey@processcert.com",  role:"viewer",   active:true, lastLogin:null },
+  { id:"u001", username:"admin",      password:"admin123", displayName:"Alex Rivera",   email:"alex@processcert.com",       role:"admin",       active:true, lastLogin:null },
+  { id:"u002", username:"engineer",   password:"eng123",   displayName:"Sam Torres",    email:"sam@processcert.com",        role:"engineer",    active:true, lastLogin:null },
+  { id:"u003", username:"operator",   password:"op123",    displayName:"Jordan Lee",    email:"jordan@processcert.com",     role:"operator",    active:true, lastLogin:null },
+  { id:"u004", username:"viewer",     password:"view123",  displayName:"Casey Morgan",  email:"casey@processcert.com",      role:"viewer",      active:true, lastLogin:null },
+  { id:"u005", username:"superadmin", password:"sa123",    displayName:"Pat Kim",       email:"pat@processcert.com",        role:"super_admin", active:true, lastLogin:null },
+];
+
+export const BUILT_IN_ROLE_DEFS = [
+  {
+    id: "viewer",     name: "Viewer",     isBuiltIn: true,
+    allowedActions: PERMISSIONS.viewer,
+    createdBy: "system", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "engineer",   name: "Engineer",   isBuiltIn: true,
+    allowedActions: PERMISSIONS.engineer,
+    createdBy: "system", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "operator",   name: "Operator",   isBuiltIn: true,
+    allowedActions: PERMISSIONS.operator,
+    createdBy: "system", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "admin",      name: "Admin",      isBuiltIn: true,
+    allowedActions: PERMISSIONS.admin,
+    createdBy: "system", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
+  },
+  {
+    id: "super_admin", name: "Super Admin", isBuiltIn: true,
+    allowedActions: PERMISSIONS.super_admin,
+    createdBy: "system", createdAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
+  },
 ];
 
 const STEPS = [
@@ -107,10 +137,15 @@ const EXECUTIONS = [
 ];
 
 export function initializeStorage() {
-  if (load(SK.USERS, null) !== null) return; // idempotent
-  persist(SK.USERS,       USERS);
-  persist(SK.STEPS,       STEPS);
-  persist(SK.PROCESSES,   PROCESSES);
-  persist(SK.ASSIGNMENTS, ASSIGNMENTS);
-  persist(SK.EXECUTIONS,  EXECUTIONS);
+  if (load(SK.USERS, null) === null) {
+    persist(SK.USERS,       USERS);
+    persist(SK.STEPS,       STEPS);
+    persist(SK.PROCESSES,   PROCESSES);
+    persist(SK.ASSIGNMENTS, ASSIGNMENTS);
+    persist(SK.EXECUTIONS,  EXECUTIONS);
+  }
+  // Seed roles independently so existing installs also get them
+  if (load(SK.ROLES, null) === null) {
+    persist(SK.ROLES, BUILT_IN_ROLE_DEFS);
+  }
 }

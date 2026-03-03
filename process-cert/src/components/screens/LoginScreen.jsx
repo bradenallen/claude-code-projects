@@ -5,10 +5,11 @@ import { iStyle } from "../ui/styles.js";
 import Btn from "../ui/Btn.jsx";
 
 const DEMO_USERS = [
-  { label: "Admin",    username: "admin",    password: "admin123", role: "admin",    color: "#5B21B6" },
-  { label: "Engineer", username: "engineer", password: "eng123",   role: "engineer", color: C.navy },
-  { label: "Operator", username: "operator", password: "op123",    role: "operator", color: "#1D4ED8" },
-  { label: "Viewer",   username: "viewer",   password: "view123",  role: "viewer",   color: C.grayText },
+  { label: "Admin",       username: "admin",      password: "admin123", role: "admin",       color: "#5B21B6" },
+  { label: "Engineer",    username: "engineer",   password: "eng123",   role: "engineer",    color: C.navy },
+  { label: "Operator",    username: "operator",   password: "op123",    role: "operator",    color: "#1D4ED8" },
+  { label: "Viewer",      username: "viewer",     password: "view123",  role: "viewer",      color: C.grayText },
+  { label: "Super Admin", username: "superadmin", password: "sa123",    role: "super_admin", color: "#7C3AED" },
 ];
 
 export default function LoginScreen({ auth }) {
@@ -114,7 +115,7 @@ export default function LoginScreen({ auth }) {
           <p style={{ textAlign: "center", fontSize: 12, color: C.grayMid, marginBottom: 12, fontFamily: "Inter, sans-serif", textTransform: "uppercase", letterSpacing: "0.05em" }}>
             Demo Accounts
           </p>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: 10 }}>
             {DEMO_USERS.map(u => (
               <button
                 key={u.username}

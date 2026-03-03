@@ -30,7 +30,10 @@ export function useAuth() {
 
   function can(action) {
     if (!user) return false;
-    return (PERMISSIONS[user.role] || []).includes(action);
+    const roles = load(SK.ROLES, []);
+    const role = roles.find(r => r.id === user.role);
+    if (role) return (role.allowedActions || []).includes(action);
+    return (PERMISSIONS[user.role] || []).includes(action); // fallback
   }
 
   function hasRole(role) {
