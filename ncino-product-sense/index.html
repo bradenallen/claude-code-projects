@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nCino — Product Prototype</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F4F7FC;
+      color: #1A2340;
+      min-height: 100vh;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #DDE4F0; border-radius: 3px; }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up { animation: slideUp 0.28s ease both; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 232px; height: 100vh;
+      background: #001A57;
+      display: flex; flex-direction: column;
+      padding: 0;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 24px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo-mark {
+      width: 32px; height: 32px;
+      background: #006FE8;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800; font-size: 16px;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+    .sidebar-logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700; font-size: 18px;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    .sidebar-logo-text span { color: #006FE8; }
+    .sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+    .nav-section-label {
+      font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: rgba(255,255,255,0.35);
+      padding: 16px 12px 6px;
+    }
+    .nav-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: 8px;
+      cursor: pointer; transition: background 0.15s;
+      color: rgba(255,255,255,0.65); font-size: 14px; font-weight: 500;
+      user-select: none;
+    }
+    .nav-item:hover { background: rgba(0,111,232,0.18); color: #fff; }
+    .nav-item.active { background: #006FE8; color: #fff; }
+    .nav-item svg { flex-shrink: 0; opacity: 0.85; }
+    .sidebar-footer {
+      padding: 16px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .avatar-row {
+      display: flex; align-items: center; gap: 10px;
+    }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #006FE8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+    }
+    .avatar-info { flex: 1; min-width: 0; }
+    .avatar-name {
+      font-size: 13px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .avatar-role {
+      font-size: 11px; color: rgba(255,255,255,0.4);
+    }
+
+    /* ── Main content ── */
+    .main {
+      margin-left: 232px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #DDE4F0;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #1A2340;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Page ── */
+    .page { padding: 28px 32px; flex: 1; }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border: 1px solid #DDE4F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,47,167,0.06);
+      padding: 24px;
+    }
+    .card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 18px;
+    }
+    .card-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 15px; font-weight: 700;
+      color: #1A2340;
+    }
+
+    /* ── Stat cards ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1px solid #DDE4F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,47,167,0.06);
+      padding: 20px 22px;
+    }
+    .stat-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 8px;
+    }
+    .stat-value {
+      font-family: 'Poppins', sans-serif;
+      font-size: 26px; font-weight: 800;
+      color: #1A2340;
+    }
+    .stat-sub {
+      font-size: 12px; color: #8A97B0; margin-top: 4px;
+    }
+    .stat-badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      background: #E8F0FF; color: #002FA7;
+      border-radius: 20px; padding: 2px 10px;
+      font-size: 11px; font-weight: 600;
+      margin-top: 6px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-primary { background: #002FA7; color: #fff; }
+    .btn-primary:hover { background: #0047BB; }
+    .btn-outline { background: #fff; color: #002FA7; border: 1.5px solid #002FA7; }
+    .btn-outline:hover { background: #E8F0FF; }
+    .btn-ghost { background: transparent; color: #4A5568; border: 1.5px solid #DDE4F0; }
+    .btn-ghost:hover { background: #F4F7FC; }
+    .btn-success { background: #00875A; color: #fff; }
+    .btn-success:hover { background: #006e49; }
+    .btn-sm { padding: 6px 13px; font-size: 12px; }
+    .btn-danger { background: #D0021B; color: #fff; }
+    .btn-danger:hover { background: #b00217; }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; border-radius: 10px; border: 1px solid #DDE4F0; }
+    table { width: 100%; border-collapse: collapse; }
+    thead tr { background: #001A57; }
+    thead th {
+      padding: 11px 16px; text-align: left;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: rgba(255,255,255,0.65);
+    }
+    tbody tr { border-bottom: 1px solid #DDE4F0; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: #E8F0FF; cursor: pointer; }
+    tbody td { padding: 12px 16px; font-size: 13px; color: #4A5568; }
+
+    /* ── Form inputs ── */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      color: #1A2340;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus {
+      border-color: #006FE8;
+      box-shadow: 0 0 0 3px #E8F0FF;
+    }
+    .form-input::placeholder { color: #8A97B0; }
+
+    /* ── Badge / tag ── */
+    .badge {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-blue { background: #E8F0FF; color: #002FA7; }
+    .badge-green { background: #E6F6F0; color: #00875A; }
+    .badge-red { background: #FFF0F2; color: #D0021B; }
+    .badge-gray { background: #F4F7FC; color: #8A97B0; border: 1px solid #DDE4F0; }
+
+    /* ── Grid helpers ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) {
+      .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .sidebar { width: 64px; }
+      .sidebar-logo-text, .nav-item span, .avatar-info, .nav-section-label { display: none; }
+      .main { margin-left: 64px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState } = React;
+
+    // ── Color tokens ──────────────────────────────────────────────────────────
+    const C = {
+      navyDark:  "#001A57",
+      navy:      "#002FA7",
+      navyMid:   "#0047BB",
+      blue:      "#006FE8",
+      blueLight: "#E8F0FF",
+      bluePale:  "#F0F5FF",
+      red:       "#D0021B",
+      redLight:  "#FFF0F2",
+      white:     "#FFFFFF",
+      grayBg:    "#F4F7FC",
+      grayLine:  "#DDE4F0",
+      grayMid:   "#8A97B0",
+      grayText:  "#4A5568",
+      dark:      "#1A2340",
+      success:   "#00875A",
+      successBg: "#E6F6F0",
+    };
+
+    // ── Icons (inline SVG) ────────────────────────────────────────────────────
+    const Icon = ({ name, size = 16, color = "currentColor" }) => {
+      const icons = {
+        home: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        ),
+        dollar: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
+        ),
+        file: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/>
+          </svg>
+        ),
+        users: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/>
+          </svg>
+        ),
+        chart: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/>
+          </svg>
+        ),
+        settings: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+          </svg>
+        ),
+        plus: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        ),
+        chevronRight: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        ),
+      };
+      return icons[name] || null;
+    };
+
+    // ── Sidebar ───────────────────────────────────────────────────────────────
+    const navItems = [
+      { id: "dashboard",  label: "Dashboard",     icon: "home"     },
+      { id: "loans",      label: "Loan Pipeline",  icon: "file"     },
+      { id: "comp",       label: "Compensation",   icon: "dollar"   },
+      { id: "borrowers",  label: "Borrowers",      icon: "users"    },
+      { id: "analytics",  label: "Analytics",      icon: "chart"    },
+      { id: "settings",   label: "Settings",       icon: "settings" },
+    ];
+
+    function Sidebar({ active, setActive }) {
+      return (
+        <div className="sidebar">
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-mark">n</div>
+            <div className="sidebar-logo-text">n<span>Cino</span></div>
+          </div>
+
+          <nav className="sidebar-nav">
+            <div className="nav-section-label">Platform</div>
+            {navItems.map(item => (
+              <div
+                key={item.id}
+                className={`nav-item${active === item.id ? " active" : ""}`}
+                onClick={() => setActive(item.id)}
+              >
+                <Icon name={item.icon} size={16} />
+                <span>{item.label}</span>
+              </div>
+            ))}
+          </nav>
+
+          <div className="sidebar-footer">
+            <div className="avatar-row">
+              <div className="avatar">JD</div>
+              <div className="avatar-info">
+                <div className="avatar-name">Jordan Davis</div>
+                <div className="avatar-role">Loan Officer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Dashboard screen ──────────────────────────────────────────────────────
+    function Dashboard() {
+      return (
+        <div className="page slide-up">
+          <div style={{ marginBottom: 24 }}>
+            <h1 style={{ fontFamily: "'Poppins',sans-serif", fontSize: 22, fontWeight: 800, color: C.dark }}>
+              Good morning, Jordan
+            </h1>
+            <p style={{ fontSize: 13, color: C.grayMid, marginTop: 4 }}>
+              Here's what's happening across your portfolio today.
+            </p>
+          </div>
+
+          <div className="stats-grid">
+            {[
+              { label: "Active Loans",    value: "48",      sub: "3 closing this week",   badge: "+5%"  },
+              { label: "Pipeline Value",  value: "$12.4M",  sub: "Across all stages",     badge: "+12%" },
+              { label: "Avg. Cycle Time", value: "18d",     sub: "Goal: 14 days",         badge: "-2d"  },
+              { label: "YTD Comp Earned", value: "$84,200", sub: "Q1 target: $110K",      badge: "76%"  },
+            ].map(s => (
+              <div className="stat-card" key={s.label}>
+                <div className="stat-label">{s.label}</div>
+                <div className="stat-value">{s.value}</div>
+                <div className="stat-sub">{s.sub}</div>
+                <div className="stat-badge">{s.badge}</div>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid-2">
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Recent Loan Activity</div>
+                <button className="btn btn-ghost btn-sm">View all</button>
+              </div>
+              <div className="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Borrower</th>
+                      <th>Type</th>
+                      <th>Amount</th>
+                      <th>Stage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[
+                      { name: "Acme Corp",        type: "C&I",  amt: "$1.2M",  stage: "Underwriting" },
+                      { name: "Pine Street LLC",  type: "CRE",  amt: "$3.8M",  stage: "Approved"     },
+                      { name: "Rivera Family Tr.", type: "SBA",  amt: "$500K",  stage: "Processing"   },
+                      { name: "Northgate Retail",  type: "CRE",  amt: "$2.1M",  stage: "Due Diligence"},
+                    ].map(r => (
+                      <tr key={r.name}>
+                        <td style={{ fontWeight: 600, color: C.dark }}>{r.name}</td>
+                        <td><span className="badge badge-blue">{r.type}</span></td>
+                        <td style={{ fontWeight: 600 }}>{r.amt}</td>
+                        <td><span className="badge badge-gray">{r.stage}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-header">
+                <div className="card-title">Compensation Summary</div>
+                <button className="btn btn-ghost btn-sm">Details</button>
+              </div>
+              {[
+                { label: "Q1 Base",           pct: 100, val: "$22,000", color: C.blue     },
+                { label: "Volume Bonus",       pct: 68,  val: "$15,300", color: C.navy     },
+                { label: "Pull-through Bonus", pct: 52,  val: "$8,900",  color: C.success  },
+                { label: "Referral Credit",    pct: 30,  val: "$3,200",  color: C.grayMid  },
+              ].map(item => (
+                <div key={item.label} style={{ marginBottom: 14 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+                    <span style={{ fontSize: 13, color: C.grayText }}>{item.label}</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: C.dark }}>{item.val}</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 4, background: C.grayLine }}>
+                    <div style={{ height: 6, borderRadius: 4, background: item.color, width: `${item.pct}%`, transition: "width 0.6s ease" }} />
+                  </div>
+                </div>
+              ))}
+              <div style={{ marginTop: 18, paddingTop: 14, borderTop: `1px solid ${C.grayLine}`, display: "flex", justifyContent: "space-between" }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: C.grayMid }}>Total earned (Q1)</span>
+                <span style={{ fontFamily: "'Poppins',sans-serif", fontSize: 18, fontWeight: 800, color: C.navy }}>$49,400</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Placeholder screens ───────────────────────────────────────────────────
+    function PlaceholderScreen({ title, description }) {
+      return (
+        <div className="page slide-up">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: 480, flexDirection: "column", gap: 16 }}>
+            <div style={{ width: 64, height: 64, borderRadius: 16, background: C.blueLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Icon name="chart" size={28} color={C.navy} />
+            </div>
+            <h2 style={{ fontFamily: "'Poppins',sans-serif", fontSize: 20, fontWeight: 700, color: C.dark }}>{title}</h2>
+            <p style={{ fontSize: 14, color: C.grayMid, maxWidth: 360, textAlign: "center" }}>{description}</p>
+            <button className="btn btn-primary"><Icon name="plus" size={14} color="#fff" />{`New ${title.split(' ')[0]}`}</button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── App root ──────────────────────────────────────────────────────────────
+    function App() {
+      const [screen, setScreen] = useState("dashboard");
+
+      const screenMap = {
+        dashboard: <Dashboard />,
+        loans:     <PlaceholderScreen title="Loan Pipeline" description="View and manage all loans in origination, underwriting, approval, and closing." />,
+        comp:      <PlaceholderScreen title="Compensation" description="Manage incentive compensation plans, review payroll transactions, and audit calculations." />,
+        borrowers: <PlaceholderScreen title="Borrowers" description="Full borrower profiles, relationship history, and document management." />,
+        analytics: <PlaceholderScreen title="Analytics" description="Turnkey dashboards for pipeline performance, pull-through rates, and team productivity." />,
+        settings:  <PlaceholderScreen title="Settings" description="Platform configuration, user management, and integration settings." />,
+      };
+
+      const activeLabel = navItems.find(n => n.id === screen)?.label || "Dashboard";
+
+      return (
+        <>
+          <Sidebar active={screen} setActive={setScreen} />
+          <div className="main">
+            <div className="topbar">
+              <div className="topbar-title">{activeLabel}</div>
+              <div className="topbar-actions">
+                <button className="btn btn-ghost btn-sm">Help</button>
+                <button className="btn btn-primary btn-sm">
+                  <Icon name="plus" size={13} color="#fff" />
+                  New Loan
+                </button>
+              </div>
+            </div>
+            {screenMap[screen]}
+          </div>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
