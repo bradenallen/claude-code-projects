@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>nCino Mortgage POS — New Application</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #F4F7FC;
+      color: #1A2340;
+      min-height: 100vh;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-thumb { background: #DDE4F0; border-radius: 3px; }
+
+    /* ── Animations ── */
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .slide-up { animation: slideUp 0.28s ease both; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      position: fixed; top: 0; left: 0;
+      width: 232px; height: 100vh;
+      background: #001A57;
+      display: flex; flex-direction: column;
+      z-index: 100;
+    }
+    .sidebar-logo {
+      display: flex; align-items: center; gap: 10px;
+      padding: 24px 24px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .sidebar-logo-mark {
+      width: 32px; height: 32px;
+      background: #006FE8;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Poppins', sans-serif;
+      font-weight: 800; font-size: 16px;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+    .sidebar-logo-text {
+      font-family: 'Poppins', sans-serif;
+      font-weight: 700; font-size: 18px;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+    .sidebar-logo-text span { color: #006FE8; }
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 16px; border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .avatar-row { display: flex; align-items: center; gap: 10px; }
+    .avatar {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: #006FE8;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; color: #fff;
+      flex-shrink: 0;
+    }
+    .avatar-info { flex: 1; min-width: 0; }
+    .avatar-name {
+      font-size: 13px; font-weight: 600; color: #fff;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .avatar-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+    /* ── Main content ── */
+    .main {
+      margin-left: 232px;
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+    }
+
+    /* ── Top bar ── */
+    .topbar {
+      background: #fff;
+      border-bottom: 1px solid #DDE4F0;
+      height: 56px;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px;
+      position: sticky; top: 0; z-index: 50;
+    }
+    .topbar-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #1A2340;
+    }
+    .topbar-actions { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 9px 18px; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      cursor: pointer; border: none; transition: all 0.15s;
+      white-space: nowrap; font-family: 'Inter', sans-serif;
+    }
+    .btn-primary { background: #002FA7; color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #0047BB; }
+    .btn-outline { background: #fff; color: #002FA7; border: 1.5px solid #002FA7; }
+    .btn-outline:hover:not(:disabled) { background: #E8F0FF; }
+    .btn-ghost { background: transparent; color: #4A5568; border: 1.5px solid #DDE4F0; }
+    .btn-ghost:hover:not(:disabled) { background: #F4F7FC; }
+    .btn-success { background: #00875A; color: #fff; }
+    .btn-success:hover:not(:disabled) { background: #006e49; }
+    .btn-lg { padding: 13px 28px; font-size: 15px; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    /* ── Badge ── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+    }
+    .badge-blue { background: #E8F0FF; color: #002FA7; }
+    .badge-green { background: #E6F6F0; color: #00875A; }
+
+    /* ── Form inputs ── */
+    .form-group { margin-bottom: 18px; }
+    .form-label {
+      display: block;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 6px;
+    }
+    .form-input {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      color: #1A2340;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-input:focus {
+      border-color: #006FE8;
+      box-shadow: 0 0 0 3px #E8F0FF;
+    }
+    .form-input::placeholder { color: #8A97B0; }
+    .form-select {
+      width: 100%;
+      background: #fff;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      color: #1A2340;
+      outline: none;
+      appearance: none;
+      cursor: pointer;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .form-select:focus {
+      border-color: #006FE8;
+      box-shadow: 0 0 0 3px #E8F0FF;
+    }
+
+    /* ── Grid helpers ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+
+    /* ── Step indicator ── */
+    .step-indicator-wrap {
+      background: #fff;
+      border-bottom: 1px solid #DDE4F0;
+      padding: 0 28px;
+      position: sticky; top: 56px; z-index: 40;
+    }
+    .step-indicator {
+      display: flex; align-items: center;
+      padding: 16px 0;
+      max-width: 840px;
+    }
+    .step-item {
+      display: flex; align-items: center; gap: 10px;
+      cursor: default;
+    }
+    .step-circle {
+      width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .step-circle.pending {
+      background: #F4F7FC;
+      border: 2px solid #DDE4F0;
+      color: #8A97B0;
+    }
+    .step-circle.active {
+      background: #002FA7;
+      border: 2px solid #002FA7;
+      color: #fff;
+    }
+    .step-circle.completed {
+      background: #00875A;
+      border: 2px solid #00875A;
+      color: #fff;
+    }
+    .step-label {
+      font-size: 12px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .step-label.pending { color: #8A97B0; }
+    .step-label.active { color: #002FA7; }
+    .step-label.completed { color: #00875A; }
+    .step-connector {
+      flex: 1; height: 2px; background: #DDE4F0;
+      margin: 0 10px; min-width: 16px;
+      transition: background 0.2s;
+    }
+    .step-connector.completed { background: #00875A; }
+
+    /* ── Wizard body ── */
+    .wizard-page { padding: 32px 28px; flex: 1; }
+    .wizard-body { max-width: 840px; }
+
+    /* ── Wizard card ── */
+    .wizard-card {
+      background: #fff;
+      border: 1px solid #DDE4F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,47,167,0.06);
+      padding: 28px 32px;
+      margin-bottom: 20px;
+    }
+    .wizard-card-title {
+      font-family: 'Poppins', sans-serif;
+      font-size: 16px; font-weight: 700;
+      color: #1A2340;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid #DDE4F0;
+    }
+
+    /* ── Segmented control ── */
+    .seg-control {
+      display: inline-flex;
+      background: #F4F7FC;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 2px;
+    }
+    .seg-control.full { display: flex; width: 100%; }
+    .seg-btn {
+      padding: 7px 16px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      font-size: 13px; font-weight: 600;
+      color: #8A97B0;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Inter', sans-serif;
+    }
+    .seg-btn.active {
+      background: #fff;
+      color: #002FA7;
+      box-shadow: 0 1px 4px rgba(0,47,167,0.12);
+    }
+    .seg-control.full .seg-btn { flex: 1; text-align: center; }
+
+    /* ── Read-only fields ── */
+    .readonly-field {
+      background: #F4F7FC;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px; font-family: 'Inter', sans-serif;
+      color: #4A5568;
+      font-weight: 600;
+    }
+
+    /* ── Toggle switch ── */
+    .toggle-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+    }
+    .toggle-label {
+      font-size: 14px; font-weight: 500; color: #1A2340;
+    }
+    .toggle-sub { font-size: 12px; color: #8A97B0; margin-top: 2px; }
+    .toggle {
+      position: relative;
+      width: 42px; height: 24px;
+      background: #DDE4F0;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle.on { background: #002FA7; }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 18px; height: 18px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    }
+    .toggle.on::after { transform: translateX(18px); }
+
+    /* ── Wizard footer actions ── */
+    .wizard-actions {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0 4px;
+    }
+
+    /* ── Step 4: Split panel ── */
+    .split-panel {
+      display: grid;
+      grid-template-columns: 38% 62%;
+      gap: 24px;
+      align-items: start;
+    }
+    .summary-panel {
+      background: #fff;
+      border: 1px solid #DDE4F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,47,167,0.06);
+      padding: 24px;
+      position: sticky;
+      top: 120px;
+    }
+    .summary-panel-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 16px;
+    }
+    .summary-row {
+      margin-bottom: 14px;
+    }
+    .summary-row-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 3px;
+    }
+    .summary-value {
+      font-size: 14px; font-weight: 600; color: #1A2340;
+    }
+    .summary-value.large {
+      font-family: 'Poppins', sans-serif;
+      font-size: 26px; font-weight: 800; color: #002FA7;
+    }
+
+    /* ── Integration cards ── */
+    .integration-card {
+      background: #fff;
+      border: 1.5px solid #DDE4F0;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(0,47,167,0.04);
+      padding: 22px;
+      margin-bottom: 16px;
+      transition: border-color 0.2s;
+    }
+    .integration-card.loading { border-color: #006FE8; }
+    .integration-card.verified { border-color: #00875A; }
+    .integration-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .integration-title-row { display: flex; align-items: center; gap: 10px; }
+    .integration-icon {
+      width: 36px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .integration-name {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px; font-weight: 700; color: #1A2340;
+    }
+    .integration-sub { font-size: 12px; color: #8A97B0; margin-top: 2px; }
+
+    /* ── Spinner ── */
+    .spinner {
+      border-radius: 50%;
+      border: 2.5px solid #E8F0FF;
+      border-top-color: #006FE8;
+      animation: spin 0.7s linear infinite;
+    }
+
+    /* ── Credit score bubbles ── */
+    .score-bubbles {
+      display: flex; gap: 16px; align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    .score-bubble {
+      display: flex; flex-direction: column; align-items: center;
+      background: #F4F7FC;
+      border: 2px solid #DDE4F0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      transition: all 0.2s;
+    }
+    .score-bubble.qualifying {
+      background: #E8F0FF;
+      border-color: #002FA7;
+      transform: scale(1.08);
+    }
+    .score-num {
+      font-family: 'Poppins', sans-serif;
+      font-size: 26px; font-weight: 800; color: #002FA7;
+    }
+    .score-bureau {
+      font-size: 11px; font-weight: 600; color: #8A97B0;
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-top: 2px;
+    }
+    .score-bubble.qualifying .score-bureau { color: #002FA7; }
+
+    /* ── Rate table ── */
+    .rate-table { width: 100%; border-collapse: collapse; }
+    .rate-row {
+      display: flex; align-items: center;
+      padding: 10px 12px;
+      border-radius: 8px;
+      gap: 0;
+      margin-bottom: 4px;
+    }
+    .rate-row.recommended { background: #E8F0FF; }
+    .rate-cell { flex: 1; font-size: 13px; color: #1A2340; }
+    .rate-cell.label { font-weight: 600; }
+    .rate-cell.value { font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 800; color: #002FA7; }
+    .rate-cell.apr { font-size: 12px; color: #8A97B0; }
+    .rate-rec-badge {
+      font-size: 10px; font-weight: 700; color: #002FA7;
+      background: #fff; border: 1px solid #002FA7;
+      border-radius: 12px; padding: 2px 8px;
+      white-space: nowrap;
+    }
+
+    /* ── Validation rows ── */
+    .validation-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid #F4F7FC;
+    }
+    .validation-row:last-child { border-bottom: none; }
+    .validation-check {
+      width: 22px; height: 22px; border-radius: 50%;
+      background: #E6F6F0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .validation-name { font-size: 13px; font-weight: 600; color: #1A2340; flex: 1; }
+    .validation-source { font-size: 12px; color: #8A97B0; }
+
+    /* ── Step 5: Review ── */
+    .review-cols {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+    .review-section { margin-bottom: 20px; }
+    .review-section-title {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.07em;
+      text-transform: uppercase; color: #8A97B0;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid #F4F7FC;
+    }
+    .review-field-row {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      padding: 6px 0;
+      font-size: 13px;
+    }
+    .review-field-label { color: #8A97B0; font-weight: 500; }
+    .review-field-value { color: #1A2340; font-weight: 600; text-align: right; }
+
+    /* ── Underwriting checklist ── */
+    .checklist-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid #F4F7FC;
+    }
+    .checklist-item:last-of-type { border-bottom: none; }
+    .check-icon {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #E6F6F0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .checklist-label { font-size: 13px; font-weight: 600; color: #1A2340; flex: 1; }
+    .checklist-detail { font-size: 12px; color: #00875A; font-weight: 500; }
+
+    /* ── Success overlay ── */
+    .success-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,26,87,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 200;
+      display: flex; align-items: center; justify-content: center;
+      animation: fadeIn 0.2s ease both;
+    }
+    .success-modal {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 44px;
+      box-shadow: 0 24px 64px rgba(0,26,87,0.25);
+      max-width: 560px; width: 100%;
+      animation: slideUp 0.3s ease both;
+      max-height: 90vh; overflow-y: auto;
+    }
+    .success-check-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: #E6F6F0;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+    }
+    .success-ttq-hero {
+      font-family: 'Poppins', sans-serif;
+      font-size: 28px; font-weight: 800; color: #00875A;
+      text-align: center;
+      margin: 8px 0 4px;
+    }
+    .success-ttq-label {
+      font-size: 13px; color: #8A97B0; text-align: center; margin-bottom: 24px;
+    }
+
+    /* ── TTQ Timeline ── */
+    .timeline-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .timeline-row.integration { background: #F0F5FF; }
+    .timeline-step { color: #4A5568; font-weight: 500; }
+    .timeline-time { font-weight: 700; color: #1A2340; display: flex; align-items: center; gap: 8px; }
+    .timeline-was { font-size: 11px; color: #D0021B; text-decoration: line-through; font-weight: 400; }
+
+    /* ── Credit factors ── */
+    .credit-factor {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 0;
+      font-size: 12px;
+      border-bottom: 1px solid #F4F7FC;
+    }
+    .credit-factor:last-child { border-bottom: none; }
+    .credit-factor-label { color: #8A97B0; }
+    .credit-factor-value { font-weight: 600; color: #1A2340; }
+
+    /* ── Section divider in wizard ── */
+    .section-sep {
+      height: 1px; background: #F4F7FC;
+      margin: 20px 0;
+    }
+
+    /* ── Idle pull card ── */
+    .idle-pull-body {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 0;
+    }
+    .idle-pull-desc { font-size: 13px; color: #8A97B0; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useCallback } = React;
+
+    // ── Color tokens ──────────────────────────────────────────────────────────
+    const C = {
+      navyDark:  "#001A57",
+      navy:      "#002FA7",
+      navyMid:   "#0047BB",
+      blue:      "#006FE8",
+      blueLight: "#E8F0FF",
+      bluePale:  "#F0F5FF",
+      red:       "#D0021B",
+      redLight:  "#FFF0F2",
+      white:     "#FFFFFF",
+      grayBg:    "#F4F7FC",
+      grayLine:  "#DDE4F0",
+      grayMid:   "#8A97B0",
+      grayText:  "#4A5568",
+      dark:      "#1A2340",
+      success:   "#00875A",
+      successBg: "#E6F6F0",
+    };
+
+    // ── TTQ Timeline mock data ─────────────────────────────────────────────────
+    const TTQ_TIMELINE = [
+      { step: "Application form started",      time: "0:00",  integration: false },
+      { step: "Borrower info completed",        time: "1:12",  integration: false },
+      { step: "Property & loan details saved",  time: "2:05",  integration: false },
+      { step: "Employment info completed",       time: "3:18",  integration: false },
+      { step: "Credit report pulled",           time: "3:45",  integration: true,  was: "~45 min avg (manual bureau pull)" },
+      { step: "Rate quote obtained",            time: "4:33",  integration: true,  was: "~30 min avg (external rate site)" },
+      { step: "Validations completed",          time: "6:43",  integration: true,  was: "~2 hr avg (manual verification)" },
+    ];
+
+    // ── Icons ─────────────────────────────────────────────────────────────────
+    const Icon = ({ name, size = 16, color = "currentColor" }) => {
+      const icons = {
+        check: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+        ),
+        clock: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+          </svg>
+        ),
+        shield: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
+        ),
+        creditCard: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+        ),
+        trending: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+          </svg>
+        ),
+        home: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+          </svg>
+        ),
+        user: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/>
+          </svg>
+        ),
+        zap: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+          </svg>
+        ),
+        edit: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+        ),
+        chevronRight: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6"/>
+          </svg>
+        ),
+        download: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+          </svg>
+        ),
+        plus: (
+          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+        ),
+      };
+      return icons[name] || null;
+    };
+
+    // ── Spinner ───────────────────────────────────────────────────────────────
+    const Spinner = ({ size = 20 }) => (
+      <div className="spinner" style={{ width: size, height: size }} />
+    );
+
+    // ── Sidebar ───────────────────────────────────────────────────────────────
+    function Sidebar() {
+      return (
+        <div className="sidebar">
+          <div className="sidebar-logo">
+            <div className="sidebar-logo-mark">n</div>
+            <div className="sidebar-logo-text">n<span>Cino</span></div>
+          </div>
+          <div style={{ padding: "20px 20px 12px", flex: 1 }}>
+            <div style={{
+              background: "rgba(0,111,232,0.12)",
+              borderRadius: 8,
+              padding: "8px 12px",
+              display: "flex", alignItems: "center", gap: 8,
+            }}>
+              <Icon name="plus" size={14} color={C.blue} />
+              <span style={{ fontSize: 13, fontWeight: 600, color: C.blue }}>New Application</span>
+            </div>
+            <div style={{ marginTop: 24, padding: "0 4px" }}>
+              <div style={{ fontSize: 10, fontWeight: 600, letterSpacing: "0.1em", textTransform: "uppercase", color: "rgba(255,255,255,0.3)", marginBottom: 8 }}>
+                Mortgage POS
+              </div>
+              <div style={{ fontSize: 12, color: "rgba(255,255,255,0.4)", lineHeight: 1.5 }}>
+                Pre-Approval Wizard
+              </div>
+            </div>
+          </div>
+          <div className="sidebar-footer">
+            <div className="avatar-row">
+              <div className="avatar">JD</div>
+              <div className="avatar-info">
+                <div className="avatar-name">Jordan Davis</div>
+                <div className="avatar-role">Loan Officer</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step Indicator ────────────────────────────────────────────────────────
+    const STEPS = [
+      "Borrower Info",
+      "Property & Loan",
+      "Employment & Income",
+      "Data Pull",
+      "Review & Pre-Approval",
+    ];
+
+    function StepIndicator({ currentStep }) {
+      return (
+        <div className="step-indicator-wrap">
+          <div className="step-indicator">
+            {STEPS.map((label, i) => {
+              const step = i + 1;
+              const status = step < currentStep ? "completed" : step === currentStep ? "active" : "pending";
+              return (
+                <React.Fragment key={step}>
+                  <div className="step-item">
+                    <div className={`step-circle ${status}`}>
+                      {status === "completed"
+                        ? <Icon name="check" size={13} color="#fff" />
+                        : step
+                      }
+                    </div>
+                    <span className={`step-label ${status}`}>{label}</span>
+                  </div>
+                  {i < STEPS.length - 1 && (
+                    <div className={`step-connector ${status === "completed" ? "completed" : ""}`} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step 1: Borrower Profile ──────────────────────────────────────────────
+    function Step1Borrower({ data, onChange, onNext }) {
+      return (
+        <div className="wizard-body slide-up">
+          <div className="wizard-card">
+            <div className="wizard-card-title">Borrower Information</div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">First Name</label>
+                <input className="form-input" value={data.firstName}
+                  onChange={e => onChange({ ...data, firstName: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Last Name</label>
+                <input className="form-input" value={data.lastName}
+                  onChange={e => onChange({ ...data, lastName: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Date of Birth</label>
+                <input className="form-input" type="date" value={data.dob}
+                  onChange={e => onChange({ ...data, dob: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">SSN (masked)</label>
+                <input className="form-input" value={data.ssn} placeholder="•••–••–••••"
+                  onChange={e => onChange({ ...data, ssn: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Email Address</label>
+                <input className="form-input" type="email" value={data.email}
+                  onChange={e => onChange({ ...data, email: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Phone Number</label>
+                <input className="form-input" type="tel" value={data.phone}
+                  onChange={e => onChange({ ...data, phone: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Marital Status</label>
+                <select className="form-select" value={data.maritalStatus}
+                  onChange={e => onChange({ ...data, maritalStatus: e.target.value })}>
+                  <option>Single</option>
+                  <option>Married</option>
+                  <option>Separated</option>
+                  <option>Divorced</option>
+                  <option>Widowed</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">Dependents</label>
+                <select className="form-select" value={data.dependents}
+                  onChange={e => onChange({ ...data, dependents: e.target.value })}>
+                  {[0,1,2,3,4,5].map(n => <option key={n}>{n}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="section-sep" />
+
+            <div className="toggle-row">
+              <div>
+                <div className="toggle-label">Add Co-Borrower</div>
+                <div className="toggle-sub">Include a co-borrower for joint credit qualification</div>
+              </div>
+              <div className={`toggle ${data.coBorrower ? "on" : ""}`}
+                onClick={() => onChange({ ...data, coBorrower: !data.coBorrower })} />
+            </div>
+
+            {data.coBorrower && (
+              <div style={{ marginTop: 16, padding: "16px", background: C.grayBg, borderRadius: 10 }}>
+                <div className="grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Co-Borrower First Name</label>
+                    <input className="form-input" value={data.coFirst}
+                      onChange={e => onChange({ ...data, coFirst: e.target.value })} />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Co-Borrower Last Name</label>
+                    <input className="form-input" value={data.coLast}
+                      onChange={e => onChange({ ...data, coLast: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="wizard-actions">
+            <div />
+            <button className="btn btn-primary btn-lg" onClick={onNext}>
+              Continue <Icon name="chevronRight" size={16} color="#fff" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step 2: Property & Loan ───────────────────────────────────────────────
+    function Step2Property({ data, onChange, onBack, onNext, loanAmount, ltv }) {
+      const fmt = n => "$" + Number(n).toLocaleString();
+
+      return (
+        <div className="wizard-body slide-up">
+          <div className="wizard-card">
+            <div className="wizard-card-title">Property & Loan Details</div>
+
+            <div className="form-group">
+              <label className="form-label">Loan Purpose</label>
+              <div className="seg-control">
+                {["Purchase", "Refinance"].map(opt => (
+                  <button key={opt} className={`seg-btn ${data.purpose === opt ? "active" : ""}`}
+                    onClick={() => onChange({ ...data, purpose: opt })}>{opt}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Property Type</label>
+              <div className="seg-control full">
+                {["Single Family", "Condo/Townhouse", "Multi-Family", "Investment"].map(opt => (
+                  <button key={opt} className={`seg-btn ${data.propertyType === opt ? "active" : ""}`}
+                    onClick={() => onChange({ ...data, propertyType: opt })}>{opt}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Property Address</label>
+              <input className="form-input" value={data.address}
+                onChange={e => onChange({ ...data, address: e.target.value })} />
+            </div>
+
+            <div className="grid-3">
+              <div className="form-group" style={{ gridColumn: "span 1" }}>
+                <label className="form-label">City</label>
+                <input className="form-input" value={data.city}
+                  onChange={e => onChange({ ...data, city: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">State</label>
+                <select className="form-select" value={data.state}
+                  onChange={e => onChange({ ...data, state: e.target.value })}>
+                  {["CA","TX","FL","NY","WA","OR","AZ","CO","GA","IL"].map(s => (
+                    <option key={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group">
+                <label className="form-label">ZIP Code</label>
+                <input className="form-input" value={data.zip}
+                  onChange={e => onChange({ ...data, zip: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="section-sep" />
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Purchase Price</label>
+                <input className="form-input" value={data.purchasePrice}
+                  onChange={e => onChange({ ...data, purchasePrice: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Down Payment</label>
+                <input className="form-input" value={data.downPayment}
+                  onChange={e => onChange({ ...data, downPayment: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Loan Amount (auto-calculated)</label>
+                <div className="readonly-field">{fmt(loanAmount)}</div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">LTV (auto-calculated)</label>
+                <div className="readonly-field" style={{ color: ltv > 80 ? C.red : C.success }}>
+                  {ltv}%
+                </div>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Loan Type</label>
+              <div className="seg-control">
+                {["Conventional", "FHA", "VA", "USDA"].map(opt => (
+                  <button key={opt} className={`seg-btn ${data.loanType === opt ? "active" : ""}`}
+                    onClick={() => onChange({ ...data, loanType: opt })}>{opt}</button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="wizard-actions">
+            <button className="btn btn-ghost btn-lg" onClick={onBack}>Back</button>
+            <button className="btn btn-primary btn-lg" onClick={onNext}>
+              Continue <Icon name="chevronRight" size={16} color="#fff" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step 3: Employment & Income ───────────────────────────────────────────
+    function Step3Employment({ data, onChange, onBack, onNext, totalIncome }) {
+      const fmt = n => "$" + Number(n).toLocaleString();
+
+      return (
+        <div className="wizard-body slide-up">
+          <div className="wizard-card">
+            <div className="wizard-card-title">Employment & Income</div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Employer Name</label>
+                <input className="form-input" value={data.employer}
+                  onChange={e => onChange({ ...data, employer: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Job Title</label>
+                <input className="form-input" value={data.jobTitle}
+                  onChange={e => onChange({ ...data, jobTitle: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">Employment Type</label>
+              <div className="seg-control">
+                {["W-2 Employee", "Self-Employed", "Retired"].map(opt => (
+                  <button key={opt} className={`seg-btn ${data.employmentType === opt ? "active" : ""}`}
+                    onClick={() => onChange({ ...data, employmentType: opt })}>{opt}</button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid-2">
+              <div className="form-group">
+                <label className="form-label">Years at Employer</label>
+                <input className="form-input" type="number" value={data.yearsAtJob}
+                  onChange={e => onChange({ ...data, yearsAtJob: e.target.value })} />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Monthly Gross Income</label>
+                <input className="form-input" value={data.monthlyIncome}
+                  onChange={e => onChange({ ...data, monthlyIncome: e.target.value })} />
+              </div>
+            </div>
+
+            <div className="section-sep" />
+
+            <div className="toggle-row">
+              <div>
+                <div className="toggle-label">Additional Income Sources</div>
+                <div className="toggle-sub">Rental income, alimony, side business, investments, etc.</div>
+              </div>
+              <div className={`toggle ${data.hasOtherIncome ? "on" : ""}`}
+                onClick={() => onChange({ ...data, hasOtherIncome: !data.hasOtherIncome })} />
+            </div>
+
+            {data.hasOtherIncome && (
+              <div style={{ marginTop: 16, padding: "16px", background: C.grayBg, borderRadius: 10 }}>
+                <div className="grid-2">
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Income Type</label>
+                    <select className="form-select" value={data.otherIncomeType}
+                      onChange={e => onChange({ ...data, otherIncomeType: e.target.value })}>
+                      <option>Rental Income</option>
+                      <option>Alimony</option>
+                      <option>Investment Income</option>
+                      <option>Social Security</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div className="form-group" style={{ marginBottom: 0 }}>
+                    <label className="form-label">Monthly Amount</label>
+                    <input className="form-input" value={data.otherIncomeAmount}
+                      onChange={e => onChange({ ...data, otherIncomeAmount: e.target.value })} />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="section-sep" />
+
+            <div className="form-group" style={{ marginBottom: 0 }}>
+              <label className="form-label">Total Monthly Income (auto-summed)</label>
+              <div className="readonly-field" style={{ fontFamily: "'Poppins',sans-serif", fontSize: 18, fontWeight: 800, color: C.navy }}>
+                {fmt(totalIncome)}
+              </div>
+            </div>
+          </div>
+
+          <div className="wizard-actions">
+            <button className="btn btn-ghost btn-lg" onClick={onBack}>Back</button>
+            <button className="btn btn-primary btn-lg" onClick={onNext}>
+              Continue <Icon name="chevronRight" size={16} color="#fff" />
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step 4: Data Pull ─────────────────────────────────────────────────────
+    function IntegrationCard({ title, subtitle, iconName, iconBg, iconColor, loading, verified, children, onPull, pullLabel, idleDesc }) {
+      const status = loading ? "loading" : verified ? "verified" : "";
+      return (
+        <div className={`integration-card ${status}`}>
+          <div className="integration-header">
+            <div className="integration-title-row">
+              <div className="integration-icon" style={{ background: iconBg }}>
+                <Icon name={iconName} size={18} color={iconColor} />
+              </div>
+              <div>
+                <div className="integration-name">{title}</div>
+                <div className="integration-sub">{subtitle}</div>
+              </div>
+            </div>
+            {verified && (
+              <span className="badge badge-green">
+                <Icon name="check" size={11} color={C.success} /> Verified
+              </span>
+            )}
+            {loading && <Spinner size={20} />}
+          </div>
+
+          {!loading && !verified && (
+            <div className="idle-pull-body">
+              <span className="idle-pull-desc">{idleDesc}</span>
+              <button className="btn btn-outline" onClick={onPull}>{pullLabel}</button>
+            </div>
+          )}
+
+          {loading && (
+            <div style={{ textAlign: "center", padding: "12px 0", fontSize: 13, color: C.grayMid }}>
+              Connecting to integration…
+            </div>
+          )}
+
+          {verified && children}
+        </div>
+      );
+    }
+
+    function Step4DataPull({
+      borrowerData, propertyData, loanAmount, ltv,
+      loadingCredit, loadingRates, loadingValidations,
+      pulledCredit, pulledRates, pulledValidations,
+      onPullCredit, onPullRates, onPullValidations,
+      allDataPulled, onBack, onContinue,
+    }) {
+      const fmt = n => "$" + Number(n).toLocaleString();
+      const fullName = `${borrowerData.firstName} ${borrowerData.lastName}`;
+
+      return (
+        <div className="wizard-body slide-up" style={{ maxWidth: "100%" }}>
+          <div className="split-panel">
+            {/* Left: Summary panel */}
+            <div className="summary-panel">
+              <div className="summary-panel-title">Application Summary</div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">Borrower</div>
+                <div className="summary-value">{fullName}</div>
+              </div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">Loan Amount</div>
+                <div className="summary-value large">{fmt(loanAmount)}</div>
+              </div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">LTV</div>
+                <div className="summary-value" style={{ color: ltv > 80 ? C.red : C.success }}>
+                  {ltv}% {ltv <= 80 ? "✓" : "⚠"}
+                </div>
+              </div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">Loan Type</div>
+                <div className="summary-value">{propertyData.loanType}</div>
+              </div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">Property Address</div>
+                <div className="summary-value" style={{ fontSize: 13 }}>
+                  {propertyData.address}<br />
+                  {propertyData.city}, {propertyData.state} {propertyData.zip}
+                </div>
+              </div>
+
+              <div className="summary-row">
+                <div className="summary-row-label">Purpose</div>
+                <div className="summary-value">{propertyData.purpose}</div>
+              </div>
+
+              <div style={{ marginTop: 20, paddingTop: 16, borderTop: `1px solid ${C.grayLine}` }}>
+                <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                  <span className={`badge ${pulledCredit ? "badge-green" : "badge-blue"}`}>
+                    {pulledCredit ? "✓" : "○"} Credit
+                  </span>
+                  <span className={`badge ${pulledRates ? "badge-green" : "badge-blue"}`}>
+                    {pulledRates ? "✓" : "○"} Rates
+                  </span>
+                  <span className={`badge ${pulledValidations ? "badge-green" : "badge-blue"}`}>
+                    {pulledValidations ? "✓" : "○"} Validated
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Integration cards */}
+            <div>
+              {/* Credit Pull */}
+              <IntegrationCard
+                title="Credit Report"
+                subtitle="Tri-merge bureau pull via Experian API"
+                iconName="creditCard"
+                iconBg={C.blueLight}
+                iconColor={C.navy}
+                loading={loadingCredit}
+                verified={pulledCredit}
+                onPull={onPullCredit}
+                pullLabel="Pull Credit Report"
+                idleDesc="Run a soft tri-merge credit pull across all 3 bureaus"
+              >
+                <div className="score-bubbles">
+                  {[
+                    { bureau: "Equifax", score: 718 },
+                    { bureau: "Experian", score: 724, qualifying: true },
+                    { bureau: "TransUnion", score: 711 },
+                  ].map(b => (
+                    <div key={b.bureau} className={`score-bubble ${b.qualifying ? "qualifying" : ""}`}>
+                      <div className="score-num">{b.score}</div>
+                      <div className="score-bureau">{b.bureau}</div>
+                      {b.qualifying && (
+                        <div style={{ fontSize: 10, color: C.navy, fontWeight: 700, marginTop: 4 }}>QUALIFYING</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: 8 }}>
+                  {[
+                    { label: "Payment History", value: "Excellent (100%)" },
+                    { label: "Credit Utilization", value: "22%" },
+                    { label: "Oldest Account", value: "9 years" },
+                    { label: "Derogatory Marks", value: "None" },
+                  ].map(f => (
+                    <div key={f.label} className="credit-factor">
+                      <span className="credit-factor-label">{f.label}</span>
+                      <span className="credit-factor-value">{f.value}</span>
+                    </div>
+                  ))}
+                </div>
+              </IntegrationCard>
+
+              {/* Rate Quote */}
+              <IntegrationCard
+                title="Rate Quote"
+                subtitle="Live rates from secondary market pricing engine"
+                iconName="trending"
+                iconBg="#FFF7E6"
+                iconColor="#C47900"
+                loading={loadingRates}
+                verified={pulledRates}
+                onPull={onPullRates}
+                pullLabel="Get Rate Quote"
+                idleDesc="Fetch current market rates for this loan profile"
+              >
+                <div>
+                  {[
+                    { term: "30yr Fixed", rate: "6.875%", apr: "6.94% APR", recommended: true },
+                    { term: "15yr Fixed", rate: "6.250%", apr: "6.31% APR", recommended: false },
+                    { term: "5/1 ARM",    rate: "6.125%", apr: "6.72% APR", recommended: false },
+                  ].map(r => (
+                    <div key={r.term} className={`rate-row ${r.recommended ? "recommended" : ""}`}>
+                      <div className="rate-cell label">{r.term}</div>
+                      <div className="rate-cell value">{r.rate}</div>
+                      <div className="rate-cell apr">{r.apr}</div>
+                      {r.recommended && <span className="rate-rec-badge">Recommended</span>}
+                    </div>
+                  ))}
+                </div>
+              </IntegrationCard>
+
+              {/* Validations */}
+              <IntegrationCard
+                title="Verification Suite"
+                subtitle="Address, employment, income & SSN validation"
+                iconName="shield"
+                iconBg={C.successBg}
+                iconColor={C.success}
+                loading={loadingValidations}
+                verified={pulledValidations}
+                onPull={onPullValidations}
+                pullLabel="Run Validations"
+                idleDesc="Validate address, employment, income, and SSN in one step"
+              >
+                <div>
+                  {[
+                    { name: "Address Verified",     source: "USPS Address API" },
+                    { name: "Employment Confirmed",  source: "The Work Number (Equifax)" },
+                    { name: "Income Validated",      source: "IRS Income Verification (4506-C)" },
+                    { name: "SSN Verified",          source: "SSA Consent-Based Verification" },
+                  ].map(v => (
+                    <div key={v.name} className="validation-row">
+                      <div className="validation-check">
+                        <Icon name="check" size={12} color={C.success} />
+                      </div>
+                      <div className="validation-name">{v.name}</div>
+                      <div className="validation-source">{v.source}</div>
+                    </div>
+                  ))}
+                </div>
+              </IntegrationCard>
+
+              <div className="wizard-actions">
+                <button className="btn btn-ghost btn-lg" onClick={onBack}>Back</button>
+                <button
+                  className={`btn btn-lg ${allDataPulled ? "btn-primary" : "btn-ghost"}`}
+                  disabled={!allDataPulled}
+                  onClick={onContinue}
+                >
+                  {allDataPulled
+                    ? <><Icon name="chevronRight" size={16} color="#fff" /> Continue to Review</>
+                    : "Complete all data pulls to continue"
+                  }
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Step 5: Review & Pre-Approval ─────────────────────────────────────────
+    function Step5Review({ borrowerData, propertyData, employmentData, loanAmount, ltv, totalIncome, onBack, onIssue }) {
+      const fmt = n => "$" + Number(n).toLocaleString();
+      const fullName = `${borrowerData.firstName} ${borrowerData.lastName}`;
+
+      const ReviewField = ({ label, value }) => (
+        <div className="review-field-row">
+          <span className="review-field-label">{label}</span>
+          <span className="review-field-value">{value}</span>
+        </div>
+      );
+
+      const ReviewSection = ({ title, fields }) => (
+        <div className="review-section">
+          <div className="review-section-title">{title}</div>
+          {fields.map(f => <ReviewField key={f.label} {...f} />)}
+        </div>
+      );
+
+      return (
+        <div className="wizard-body slide-up" style={{ maxWidth: "100%" }}>
+          <div className="review-cols">
+            {/* Left: Application summary */}
+            <div className="wizard-card" style={{ marginBottom: 0 }}>
+              <div className="wizard-card-title">Application Summary</div>
+
+              <ReviewSection title="Borrower" fields={[
+                { label: "Name",           value: fullName },
+                { label: "Date of Birth",  value: borrowerData.dob },
+                { label: "Email",          value: borrowerData.email },
+                { label: "Phone",          value: borrowerData.phone },
+                { label: "Marital Status", value: borrowerData.maritalStatus },
+                { label: "Dependents",     value: borrowerData.dependents },
+              ]} />
+
+              <ReviewSection title="Property & Loan" fields={[
+                { label: "Purpose",        value: propertyData.purpose },
+                { label: "Property Type",  value: propertyData.propertyType },
+                { label: "Address",        value: `${propertyData.address}, ${propertyData.city}, ${propertyData.state} ${propertyData.zip}` },
+                { label: "Purchase Price", value: fmt(propertyData.purchasePrice) },
+                { label: "Down Payment",   value: fmt(propertyData.downPayment) },
+                { label: "Loan Amount",    value: fmt(loanAmount) },
+                { label: "LTV",            value: `${ltv}%` },
+                { label: "Loan Type",      value: propertyData.loanType },
+              ]} />
+
+              <ReviewSection title="Employment & Income" fields={[
+                { label: "Employer",         value: employmentData.employer },
+                { label: "Job Title",        value: employmentData.jobTitle },
+                { label: "Employment Type",  value: employmentData.employmentType },
+                { label: "Years at Job",     value: `${employmentData.yearsAtJob} years` },
+                { label: "Monthly Income",   value: fmt(totalIncome) },
+              ]} />
+
+              <ReviewSection title="Credit" fields={[
+                { label: "Qualifying Score",   value: "724 (Experian)" },
+                { label: "Payment History",    value: "Excellent" },
+                { label: "Utilization",        value: "22%" },
+                { label: "Derogatory Marks",   value: "None" },
+              ]} />
+
+              <ReviewSection title="Rate Selected" fields={[
+                { label: "Program",  value: "30yr Fixed" },
+                { label: "Rate",     value: "6.875%" },
+                { label: "APR",      value: "6.94%" },
+              ]} />
+
+              <ReviewSection title="Validations" fields={[
+                { label: "Address",    value: "✓ Verified (USPS)" },
+                { label: "Employment", value: "✓ Confirmed (Work Number)" },
+                { label: "Income",     value: "✓ Validated (IRS 4506-C)" },
+                { label: "SSN",        value: "✓ Verified (SSA)" },
+              ]} />
+            </div>
+
+            {/* Right: Underwriting readiness */}
+            <div>
+              <div className="wizard-card" style={{ marginBottom: 16 }}>
+                <div className="wizard-card-title">Underwriting Readiness</div>
+
+                {[
+                  { label: "Credit Score ≥ 620",      detail: "724 — Qualifies",        pass: true },
+                  { label: "LTV ≤ 95%",               detail: `${ltv}% — Within limit`, pass: ltv <= 95 },
+                  { label: "Employment Verified",      detail: "Confirmed via The Work Number", pass: true },
+                  { label: "Address Validated",        detail: "USPS verified",          pass: true },
+                  { label: "Income Sufficient",        detail: `${fmt(totalIncome)}/mo — DTI 28%`, pass: true },
+                  { label: "Docs Collected",           detail: "ID + 2yr W-2s on file",  pass: true },
+                ].map(item => (
+                  <div key={item.label} className="checklist-item">
+                    <div className="check-icon">
+                      <Icon name="check" size={13} color={item.pass ? C.success : C.red} />
+                    </div>
+                    <div className="checklist-label">{item.label}</div>
+                    <div className="checklist-detail">{item.detail}</div>
+                  </div>
+                ))}
+
+                <div style={{ marginTop: 20, padding: "16px", background: C.successBg, borderRadius: 10, display: "flex", alignItems: "center", gap: 10 }}>
+                  <Icon name="check" size={18} color={C.success} />
+                  <span style={{ fontSize: 13, fontWeight: 600, color: C.success }}>
+                    All criteria met — Ready to issue pre-approval
+                  </span>
+                </div>
+              </div>
+
+              <button
+                className="btn btn-success btn-lg"
+                style={{ width: "100%", justifyContent: "center" }}
+                onClick={onIssue}
+              >
+                <Icon name="shield" size={18} color="#fff" />
+                Issue Pre-Approval Letter
+              </button>
+
+              <div className="wizard-actions" style={{ paddingTop: 16 }}>
+                <button className="btn btn-ghost" onClick={onBack}>Back</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── Success Modal ─────────────────────────────────────────────────────────
+    function SuccessModal({ borrowerName, loanAmount, onReset }) {
+      const fmt = n => "$" + Number(n).toLocaleString();
+
+      return (
+        <div className="success-overlay" onClick={e => e.target === e.currentTarget && onReset()}>
+          <div className="success-modal">
+            <div className="success-check-circle">
+              <Icon name="check" size={36} color={C.success} />
+            </div>
+
+            <h2 style={{ fontFamily: "'Poppins',sans-serif", fontSize: 22, fontWeight: 800, color: C.dark, textAlign: "center" }}>
+              Pre-Approval Letter Issued!
+            </h2>
+            <p style={{ fontSize: 14, color: C.grayMid, textAlign: "center", marginTop: 8 }}>
+              {borrowerName} &nbsp;·&nbsp; {fmt(loanAmount)} Conventional Loan
+            </p>
+
+            <div style={{ textAlign: "center", margin: "20px 0 4px" }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: C.grayMid, marginBottom: 4 }}>
+                <Icon name="clock" size={12} color={C.grayMid} /> Time to Quote
+              </div>
+              <div className="success-ttq-hero">6 minutes 43 seconds</div>
+              <div className="success-ttq-label">vs. industry average of 3–5 business days</div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+              <button className="btn btn-outline" style={{ flex: 1, justifyContent: "center" }}>
+                <Icon name="download" size={14} color={C.navy} /> Download Letter
+              </button>
+              <button className="btn btn-primary" style={{ flex: 1, justifyContent: "center" }} onClick={onReset}>
+                <Icon name="plus" size={14} color="#fff" /> Start New Application
+              </button>
+            </div>
+
+            <div style={{ borderTop: `1px solid ${C.grayLine}`, paddingTop: 18 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.07em", textTransform: "uppercase", color: C.grayMid, marginBottom: 12 }}>
+                Time to Quote — Step Breakdown
+              </div>
+              {TTQ_TIMELINE.map((row, i) => (
+                <div key={i} className={`timeline-row ${row.integration ? "integration" : ""}`}>
+                  <span className="timeline-step">{row.step}</span>
+                  <span className="timeline-time">
+                    {row.time}
+                    {row.was && <span className="timeline-was">{row.was}</span>}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── New Application Wizard (container) ────────────────────────────────────
+    function NewApplicationWizard({
+      wizardStep, setWizardStep,
+      borrowerData, setBorrowerData,
+      propertyData, setPropertyData,
+      employmentData, setEmploymentData,
+      loadingCredit, loadingRates, loadingValidations,
+      pulledCredit, pulledRates, pulledValidations,
+      onPullCredit, onPullRates, onPullValidations,
+      allDataPulled,
+      showSuccessModal, setShowSuccessModal,
+      loanAmount, ltv, totalIncome,
+      onReset,
+    }) {
+      const goTo = step => {
+        setWizardStep(step);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      };
+
+      return (
+        <>
+          <StepIndicator currentStep={wizardStep} />
+          <div className="wizard-page">
+            {wizardStep === 1 && (
+              <Step1Borrower
+                data={borrowerData}
+                onChange={setBorrowerData}
+                onNext={() => goTo(2)}
+              />
+            )}
+            {wizardStep === 2 && (
+              <Step2Property
+                data={propertyData}
+                onChange={setPropertyData}
+                onBack={() => goTo(1)}
+                onNext={() => goTo(3)}
+                loanAmount={loanAmount}
+                ltv={ltv}
+              />
+            )}
+            {wizardStep === 3 && (
+              <Step3Employment
+                data={employmentData}
+                onChange={setEmploymentData}
+                onBack={() => goTo(2)}
+                onNext={() => goTo(4)}
+                totalIncome={totalIncome}
+              />
+            )}
+            {wizardStep === 4 && (
+              <Step4DataPull
+                borrowerData={borrowerData}
+                propertyData={propertyData}
+                loanAmount={loanAmount}
+                ltv={ltv}
+                loadingCredit={loadingCredit}
+                loadingRates={loadingRates}
+                loadingValidations={loadingValidations}
+                pulledCredit={pulledCredit}
+                pulledRates={pulledRates}
+                pulledValidations={pulledValidations}
+                onPullCredit={onPullCredit}
+                onPullRates={onPullRates}
+                onPullValidations={onPullValidations}
+                allDataPulled={allDataPulled}
+                onBack={() => goTo(3)}
+                onContinue={() => goTo(5)}
+              />
+            )}
+            {wizardStep === 5 && (
+              <Step5Review
+                borrowerData={borrowerData}
+                propertyData={propertyData}
+                employmentData={employmentData}
+                loanAmount={loanAmount}
+                ltv={ltv}
+                totalIncome={totalIncome}
+                onBack={() => goTo(4)}
+                onIssue={() => setShowSuccessModal(true)}
+              />
+            )}
+          </div>
+
+          {showSuccessModal && (
+            <SuccessModal
+              borrowerName={`${borrowerData.firstName} ${borrowerData.lastName}`}
+              loanAmount={loanAmount}
+              onReset={onReset}
+            />
+          )}
+        </>
+      );
+    }
+
+    // ── App root ──────────────────────────────────────────────────────────────
+    function App() {
+      const [wizardStep, setWizardStep] = useState(1);
+
+      const [borrowerData, setBorrowerData] = useState({
+        firstName: "Sarah",
+        lastName: "Chen",
+        dob: "1988-04-15",
+        ssn: "•••–••–6742",
+        email: "sarah.chen@email.com",
+        phone: "(415) 555-0182",
+        maritalStatus: "Married",
+        dependents: "2",
+        coBorrower: false,
+        coFirst: "Michael",
+        coLast: "Chen",
+      });
+
+      const [propertyData, setPropertyData] = useState({
+        purpose: "Purchase",
+        propertyType: "Single Family",
+        address: "4821 Maple Grove Lane",
+        city: "San Jose",
+        state: "CA",
+        zip: "95128",
+        purchasePrice: "875000",
+        downPayment: "175000",
+        loanType: "Conventional",
+      });
+
+      const [employmentData, setEmploymentData] = useState({
+        employer: "Salesforce Inc.",
+        jobTitle: "Senior Product Manager",
+        employmentType: "W-2 Employee",
+        yearsAtJob: "4",
+        monthlyIncome: "14200",
+        hasOtherIncome: true,
+        otherIncomeType: "Rental Income",
+        otherIncomeAmount: "2400",
+      });
+
+      const [loadingCredit, setLoadingCredit]           = useState(false);
+      const [loadingRates, setLoadingRates]             = useState(false);
+      const [loadingValidations, setLoadingValidations] = useState(false);
+      const [pulledCredit, setPulledCredit]             = useState(false);
+      const [pulledRates, setPulledRates]               = useState(false);
+      const [pulledValidations, setPulledValidations]   = useState(false);
+      const [showSuccessModal, setShowSuccessModal]     = useState(false);
+
+      // Derived values
+      const purchasePrice = Number(String(propertyData.purchasePrice).replace(/[^0-9]/g, "")) || 0;
+      const downPayment   = Number(String(propertyData.downPayment).replace(/[^0-9]/g, "")) || 0;
+      const loanAmount    = Math.max(0, purchasePrice - downPayment);
+      const ltv           = purchasePrice > 0 ? Math.round((loanAmount / purchasePrice) * 100) : 0;
+
+      const monthlyIncome     = Number(String(employmentData.monthlyIncome).replace(/[^0-9]/g, "")) || 0;
+      const otherIncomeAmt    = Number(String(employmentData.otherIncomeAmount).replace(/[^0-9]/g, "")) || 0;
+      const totalIncome       = monthlyIncome + (employmentData.hasOtherIncome ? otherIncomeAmt : 0);
+
+      const allDataPulled = pulledCredit && pulledRates && pulledValidations;
+
+      const onPullCredit = () => {
+        if (pulledCredit || loadingCredit) return;
+        setLoadingCredit(true);
+        setTimeout(() => { setLoadingCredit(false); setPulledCredit(true); }, 1500);
+      };
+      const onPullRates = () => {
+        if (pulledRates || loadingRates) return;
+        setLoadingRates(true);
+        setTimeout(() => { setLoadingRates(false); setPulledRates(true); }, 1000);
+      };
+      const onPullValidations = () => {
+        if (pulledValidations || loadingValidations) return;
+        setLoadingValidations(true);
+        setTimeout(() => { setLoadingValidations(false); setPulledValidations(true); }, 2000);
+      };
+
+      const onReset = () => {
+        setWizardStep(1);
+        setPulledCredit(false);
+        setPulledRates(false);
+        setPulledValidations(false);
+        setLoadingCredit(false);
+        setLoadingRates(false);
+        setLoadingValidations(false);
+        setShowSuccessModal(false);
+      };
+
+      return (
+        <>
+          <Sidebar />
+          <div className="main">
+            <div className="topbar">
+              <div className="topbar-title">New Mortgage Application</div>
+              <div className="topbar-actions">
+                <span style={{ fontSize: 13, color: C.grayMid }}>
+                  <Icon name="clock" size={13} color={C.grayMid} /> {" "}
+                  Pre-Approval Wizard
+                </span>
+              </div>
+            </div>
+
+            <NewApplicationWizard
+              wizardStep={wizardStep}
+              setWizardStep={setWizardStep}
+              borrowerData={borrowerData}
+              setBorrowerData={setBorrowerData}
+              propertyData={propertyData}
+              setPropertyData={setPropertyData}
+              employmentData={employmentData}
+              setEmploymentData={setEmploymentData}
+              loadingCredit={loadingCredit}
+              loadingRates={loadingRates}
+              loadingValidations={loadingValidations}
+              pulledCredit={pulledCredit}
+              pulledRates={pulledRates}
+              pulledValidations={pulledValidations}
+              onPullCredit={onPullCredit}
+              onPullRates={onPullRates}
+              onPullValidations={onPullValidations}
+              allDataPulled={allDataPulled}
+              showSuccessModal={showSuccessModal}
+              setShowSuccessModal={setShowSuccessModal}
+              loanAmount={loanAmount}
+              ltv={ltv}
+              totalIncome={totalIncome}
+              onReset={onReset}
+            />
+          </div>
+        </>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
